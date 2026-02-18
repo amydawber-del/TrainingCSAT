@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trainer Dashboard — Street Group</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #18181f;
+    --surface-2: #21212c;
+    --border: #2a2a38;
+    --text-primary: #f0f0f5;
+    --text-secondary: #8888aa;
+    --text-muted: #4a4a66;
+    --blue: #527dff;
+    --blue-light: #7a9cff;
+    --blue-dim: rgba(82,125,255,0.12);
+    --yellow: #f1c238;
+    --yellow-dim: rgba(241,194,56,0.12);
+    --green: #3dd68c;
+    --green-dim: rgba(61,214,140,0.1);
+    --red: #f9697a;
+    --red-dim: rgba(249,105,122,0.1);
+    --cream: #f5ede5;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Layout */
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+  }
+
+  /* Header */
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .header-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 40px;
+    line-height: 1.1;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .header-left h1 em {
+    font-style: italic;
+    color: var(--blue-light);
+  }
+
+  .header-left p {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .last-updated {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* Trainer selector */
+  .trainer-selector {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .trainer-btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .trainer-btn:hover {
+    border-color: var(--blue);
+    color: var(--text-primary);
+    background: var(--blue-dim);
+  }
+
+  .trainer-btn.active {
+    border-color: var(--blue);
+    background: var(--blue-dim);
+    color: var(--blue-light);
+    font-weight: 600;
+  }
+
+
+  /* Hamburger menu */
+  .hamburger-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .hamburger-btn:hover {
+    border-color: var(--blue);
+    background: var(--blue-dim);
+  }
+
+  .hamburger-btn .bar {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: all 0.25s;
+  }
+
+  .hamburger-btn.open .bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .hamburger-btn.open .bar:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+
+  .hamburger-btn.open .bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Slide-out nav drawer */
+  .nav-drawer {
+    position: fixed;
+    top: 0;
+    left: -280px;
+    width: 260px;
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    z-index: 999;
+    padding: 80px 24px 40px;
+    transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .nav-drawer.open {
+    left: 0;
+  }
+
+  .nav-drawer-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+
+  .nav-link:hover {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    border-color: var(--border);
+  }
+
+  .nav-link.active {
+    background: var(--blue-dim);
+    color: var(--blue-light);
+    border-color: var(--blue);
+  }
+
+  .nav-link .nav-icon {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* Overlay behind drawer */
+  .nav-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+
+  .nav-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Offset page content when drawer is present */
+  .page {
+    transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Loading / error state */
+  .state-msg {
+    text-align: center;
+    padding: 80px 24px;
+    color: var(--text-secondary);
+  }
+
+  .state-msg .icon { font-size: 36px; margin-bottom: 12px; }
+  .state-msg h2 { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text-primary); margin-bottom: 8px; }
+  .state-msg p { font-size: 13px; line-height: 1.6; max-width: 420px; margin: 0 auto; }
+  .state-msg code { background: var(--surface-2); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: var(--blue-light); }
+
+  /* KPI grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .kpi-card.blue::before  { background: var(--blue); }
+  .kpi-card.yellow::before { background: var(--yellow); }
+  .kpi-card.green::before  { background: var(--green); }
+  .kpi-card.red::before   { background: var(--red); }
+
+  .kpi-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 38px;
+    line-height: 1;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .kpi-card.blue  .kpi-value { color: var(--blue-light); }
+  .kpi-card.yellow .kpi-value { color: var(--yellow); }
+  .kpi-card.green  .kpi-value { color: var(--green); }
+  .kpi-card.red   .kpi-value { color: var(--red); }
+
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* Section heading */
+  .section-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+    margin-top: 36px;
+  }
+
+  /* Score bars */
+  .score-rows { display: flex; flex-direction: column; gap: 14px; }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 36px;
+    align-items: center;
+    gap: 14px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .score-name {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .bar-track {
+    height: 8px;
+    background: var(--surface-2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+    background: linear-gradient(90deg, var(--blue) 0%, var(--blue-light) 100%);
+  }
+
+  .bar-fill.yellow { background: linear-gradient(90deg, #d4a800 0%, var(--yellow) 100%); }
+  .bar-fill.green  { background: linear-gradient(90deg, #27a86a 0%, var(--green) 100%); }
+
+  .score-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+  }
+
+  /* Two column layout */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Pace chart */
+  .pace-bars {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .pace-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .pace-item:last-child { margin-bottom: 0; }
+
+  .pace-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    width: 70px;
+    flex-shrink: 0;
+  }
+
+  .pace-bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--surface-2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .pace-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  .pace-bar-fill.slow  { background: var(--red); }
+  .pace-bar-fill.right { background: var(--green); }
+  .pace-bar-fill.fast  { background: var(--yellow); }
+
+  .pace-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    width: 24px;
+    text-align: right;
+  }
+
+  /* Red flags panel */
+  .flags-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .flag-count-big {
+    font-family: 'DM Serif Display', serif;
+    font-size: 48px;
+    color: var(--red);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .flag-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .flag-tip {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 10px 14px;
+    background: var(--red-dim);
+    border-left: 3px solid var(--red);
+    border-radius: 0 6px 6px 0;
+    line-height: 1.5;
+  }
+
+  .flag-tip.green {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* Comments feed */
+  .comments-feed { display: flex; flex-direction: column; gap: 10px; }
+
+  .comment-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .comment-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .comment-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .comment-badge.helpful { background: var(--green-dim); color: var(--green); }
+  .comment-badge.improve { background: var(--yellow-dim); color: var(--yellow); }
+  .comment-badge.missing { background: var(--blue-dim); color: var(--blue-light); }
+
+  .comment-date { font-size: 11px; color: var(--text-muted); }
+  .comment-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+
+  .no-comments {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  /* Setup instructions */
+  .setup-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-top: 24px;
+  }
+
+  .setup-box h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+  }
+
+  .setup-step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+
+  .step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--blue-dim);
+    border: 1px solid var(--blue);
+    color: var(--blue-light);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .setup-step p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .setup-step code { background: var(--surface-2); padding: 2px 7px; border-radius: 4px; font-size: 12px; color: var(--blue-light); }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .dashboard-content { display: none; }
+  .dashboard-content.show { display: block; }
+
+  /* Refresh btn */
+  .refresh-btn {
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 8px;
+  }
+
+  .refresh-btn:hover { border-color: var(--blue); color: var(--blue-light); }
+
+  .spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- Nav overlay -->
+<div class="nav-overlay" id="nav-overlay" onclick="closeMenu()"></div>
+
+<!-- Nav drawer -->
+<div class="nav-drawer" id="nav-drawer">
+  <div class="nav-drawer-title">Navigation</div>
+  <a class="nav-link" href="https://amydawber-del.github.io/TilTracker/" >
+    <span class="nav-icon">📚</span> TIL Tracker
+  </a>
+  <a class="nav-link active" href="https://amydawber-del.github.io/TrainingCSAT/dashboard.html">
+    <span class="nav-icon">📊</span> Trainer Dashboard
+  </a>
+  <a class="nav-link" href="https://amydawber-del.github.io/TrainingCSAT/">
+    <span class="nav-icon">📝</span> Training Survey
+  </a>
+</div>
+
+<!-- Hamburger button -->
+<button class="hamburger-btn" id="hamburger-btn" onclick="toggleMenu()" aria-label="Open navigation">
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+</button>
+
+<div class="page">
+
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Trainer <em>Dashboard</em></h1>
+      <p>Post-training CSAT — live from Google Sheets</p>
+      <div class="last-updated" id="last-updated">Loading data…</div>
+      <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+      <button class="refresh-btn" onclick="showDebug()" style="margin-left:6px;">🔍 Debug data</button>
+    </div>
+    <div class="trainer-selector" id="trainer-selector">
+      <button class="trainer-btn active" data-trainer="Amy" onclick="selectTrainer('Amy', this)">Amy</button>
+      <button class="trainer-btn" data-trainer="Max" onclick="selectTrainer('Max', this)">Max</button>
+      <button class="trainer-btn" data-trainer="Mat" onclick="selectTrainer('Mat', this)">Mat</button>
+      <button class="trainer-btn" data-trainer="Jess" onclick="selectTrainer('Jess', this)">Jess</button>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div class="state-msg" id="loading-state">
+    <div class="icon"><span class="spinner"></span></div>
+    <h2>Loading data…</h2>
+    <p>Fetching responses from Google Sheets</p>
+  </div>
+
+  <!-- Error / setup state -->
+  <div class="state-msg" id="setup-state" style="display:none;">
+    <div class="icon">⚙️</div>
+    <h2>One quick setup step</h2>
+    <p>To connect this dashboard to your live data, you need to publish your Google Sheet and paste your Sheet ID below.</p>
+    <div class="setup-box" style="text-align:left; margin-top:24px;">
+      <h3>How to connect your sheet</h3>
+      <div class="setup-step">
+        <div class="step-num">1</div>
+        <p>In your Google Sheet go to <strong>File → Share → Publish to web</strong>. Choose <strong>Entire Document</strong> and <strong>CSV</strong>, then click <strong>Publish</strong>.</p>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">2</div>
+        <p>Your Sheet ID is the long string in the URL between <code>/d/</code> and <code>/edit</code>. For your sheet it is:<br><code>1uWTW8cD5PP2wi0XWf8EBR4aDZAoo8cccCMYQNl380uY</code></p>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">3</div>
+        <p>In this <code>dashboard.html</code> file, find the line that says <code>const SHEET_ID</code> near the top of the script and confirm it matches your Sheet ID.</p>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">4</div>
+        <p>Find the line <code>const RESPONSES_GID</code> and set it to the <strong>gid</strong> of your <em>Form Responses</em> tab (visible in the URL when you click that tab).</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard content -->
+  <div class="dashboard-content" id="dashboard-content">
+
+    <!-- KPI row -->
+    <div class="kpi-grid" id="kpi-grid"></div>
+
+    <!-- Score bars -->
+    <div class="section-title">Quality Scores — Average out of 5</div>
+    <div class="score-rows" id="score-rows"></div>
+
+    <!-- Pace + Red flags -->
+    <div class="section-title">Pace & Red Flags</div>
+    <div class="two-col">
+      <div class="pace-bars" id="pace-bars"></div>
+      <div class="flags-panel" id="flags-panel"></div>
+    </div>
+
+    <!-- Comments -->
+    <div class="section-title" id="comments-title">Recent Comments</div>
+    <div class="comments-feed" id="comments-feed"></div>
+
+  </div>
+
+
+  <!-- Debug panel -->
+  <div id="debug-panel" style="display:none; margin-top:40px; background:#18181f; border:1px solid #2a2a38; border-radius:14px; padding:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#4a4a66;">Debug — Raw Data</div>
+      <button onclick="document.getElementById('debug-panel').style.display='none'" style="font-size:11px;background:none;border:none;color:#4a4a66;cursor:pointer;">✕ close</button>
+    </div>
+    <div id="debug-content" style="font-family:monospace;font-size:11px;color:#8888aa;line-height:1.8;white-space:pre-wrap;"></div>
+  </div>
+
+</div>
+
+<script>
+  // ── CONFIGURATION ─────────────────────────────────────────────────────────
+  const SHEET_ID       = "1uWTW8cD5PP2wi0XWf8EBR4aDZAoo8cccCMYQNl380uY";
+  const RESPONSES_GID  = "0";          // gid of your Form Responses tab
+  const API_KEY        = "AIzaSyCoqHhMMorLhVPYr4BIDBbqZ85gAGFeTu4";
+  // Column indices (0-based) matching your sheet layout:
+  // A=0 Timestamp, B=1 Trainer, C=2 Identity, D=3 Company,
+  // E=4 CSAT, F=5 Usefulness, G=6 Clarity, H=7 Confidence,
+  // I=8 Pace, J=9 Helpful, K=10 Improve, L=11 MissingYN,
+  // M=12 MissingText, N=13 NPS, O=14 Comments
+  const COL = {
+    timestamp: 0, trainer: 1, identity: 2, company: 3,
+    csat: 4, usefulness: 5, clarity: 6, confidence: 7,
+    pace: 8, helpful: 9, improve: 10, missingYN: 11,
+    missingText: 12, nps: 13, comments: 14
+  };
+  // ──────────────────────────────────────────────────────────────────────────
+
+  let allRows = [];
+  let rawDebugRows = [];
+  let currentTrainer = 'Amy';
+
+  async function loadData() {
+    document.getElementById('loading-state').style.display = 'block';
+    document.getElementById('setup-state').style.display = 'none';
+    document.getElementById('dashboard-content').classList.remove('show');
+    document.getElementById('last-updated').textContent = 'Loading data…';
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A:P?key=${API_KEY}`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error?.message || 'API error');
+      }
+      const json = await res.json();
+      const rows = json.values || [];
+      allRows = rows.slice(1); // skip header row
+      rawDebugRows = rows;
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('dashboard-content').classList.add('show');
+      document.getElementById('last-updated').textContent =
+        'Last updated: ' + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      renderDashboard(currentTrainer);
+    } catch (e) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('setup-state').style.display = 'block';
+      console.error(e);
+    }
+  }
+
+
+  function selectTrainer(name, btn) {
+    currentTrainer = name;
+    document.querySelectorAll('.trainer-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderDashboard(name);
+  }
+
+  function getTrainerRows(trainer) {
+    return allRows.filter(r => r[COL.trainer] && r[COL.trainer].trim() === trainer);
+  }
+
+  function avg(rows, col) {
+    const vals = rows.map(r => parseFloat(r[col])).filter(v => !isNaN(v));
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  }
+
+  function fmt(val, decimals = 1) {
+    return val === null ? '—' : val.toFixed(decimals);
+  }
+
+  function renderDashboard(trainer) {
+    const rows = getTrainerRows(trainer);
+    const total = rows.length;
+    const satisfied = rows.filter(r => parseFloat(r[COL.csat]) >= 4).length;
+    const csatPct = total ? Math.round((satisfied / total) * 100) : null;
+    const redFlags = rows.filter(r => parseFloat(r[COL.csat]) <= 2).length;
+    const avgNPS = avg(rows, COL.nps);
+    const avgUse = avg(rows, COL.usefulness);
+    const avgCla = avg(rows, COL.clarity);
+    const avgCon = avg(rows, COL.confidence);
+
+    // KPIs
+    const kpiEl = document.getElementById('kpi-grid');
+    kpiEl.innerHTML = `
+      <div class="kpi-card blue" style="animation-delay:0s">
+        <div class="kpi-label">Total Responses</div>
+        <div class="kpi-value">${total}</div>
+        <div class="kpi-sub">sessions with ${trainer}</div>
+      </div>
+      <div class="kpi-card ${csatPct >= 80 ? 'green' : csatPct >= 60 ? 'yellow' : 'red'}" style="animation-delay:0.05s">
+        <div class="kpi-label">CSAT Score</div>
+        <div class="kpi-value">${csatPct !== null ? csatPct + '%' : '—'}</div>
+        <div class="kpi-sub">rated 4 or 5 stars</div>
+      </div>
+      <div class="kpi-card red" style="animation-delay:0.1s">
+        <div class="kpi-label">Red Flags</div>
+        <div class="kpi-value">${redFlags}</div>
+        <div class="kpi-sub">rated 1–2 stars</div>
+      </div>
+      <div class="kpi-card yellow" style="animation-delay:0.15s">
+        <div class="kpi-label">Avg NPS</div>
+        <div class="kpi-value">${fmt(avgNPS)}</div>
+        <div class="kpi-sub">out of 10</div>
+      </div>
+    `;
+
+    // Score bars
+    const scores = [
+      { name: 'Usefulness',  val: avgUse, color: 'blue' },
+      { name: 'Clarity',     val: avgCla, color: 'green' },
+      { name: 'Confidence',  val: avgCon, color: 'yellow' },
+    ];
+    document.getElementById('score-rows').innerHTML = scores.map(s => `
+      <div class="score-row">
+        <div class="score-name">${s.name}</div>
+        <div class="bar-track">
+          <div class="bar-fill ${s.color}" style="width:${s.val !== null ? (s.val / 5 * 100) : 0}%"></div>
+        </div>
+        <div class="score-val">${fmt(s.val)}</div>
+      </div>
+    `).join('');
+
+    // Pace
+    const paceCounts = { slow: 0, right: 0, fast: 0 };
+    rows.forEach(r => {
+      const p = (r[COL.pace] || '').trim().toLowerCase();
+      if (p === 'slow') paceCounts.slow++;
+      else if (p === 'right') paceCounts.right++;
+      else if (p === 'fast') paceCounts.fast++;
+    });
+    const paceTotal = paceCounts.slow + paceCounts.right + paceCounts.fast || 1;
+    document.getElementById('pace-bars').innerHTML = `
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">Session Pace</div>
+      <div class="pace-item">
+        <div class="pace-label">🐢 Too slow</div>
+        <div class="pace-bar-track"><div class="pace-bar-fill slow" style="width:${paceCounts.slow/paceTotal*100}%"></div></div>
+        <div class="pace-count">${paceCounts.slow}</div>
+      </div>
+      <div class="pace-item">
+        <div class="pace-label">✅ About right</div>
+        <div class="pace-bar-track"><div class="pace-bar-fill right" style="width:${paceCounts.right/paceTotal*100}%"></div></div>
+        <div class="pace-count">${paceCounts.right}</div>
+      </div>
+      <div class="pace-item">
+        <div class="pace-label">🚀 Too fast</div>
+        <div class="pace-bar-track"><div class="pace-bar-fill fast" style="width:${paceCounts.fast/paceTotal*100}%"></div></div>
+        <div class="pace-count">${paceCounts.fast}</div>
+      </div>
+    `;
+
+    // Red flags panel
+    const flagEl = document.getElementById('flags-panel');
+    flagEl.innerHTML = `
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:14px;">Red Flags</div>
+      <div class="flag-count-big">${redFlags}</div>
+      <div class="flag-sub">responses rated 1–2 stars</div>
+      <div class="flag-tip ${redFlags === 0 ? 'green' : ''}">
+        ${redFlags === 0
+          ? '✅ No red flags — great session feedback!'
+          : `⚠️ ${redFlags} response${redFlags > 1 ? 's' : ''} rated very low. Check the comments below for context.`}
+      </div>
+    `;
+
+    // Comments feed — show last 10 non-empty comments
+    const commentCards = [];
+    rows.slice().reverse().forEach(r => {
+      const ts = r[COL.timestamp] ? new Date(r[COL.timestamp]).toLocaleDateString('en-GB', { day:'numeric', month:'short' }) : '';
+      if (r[COL.helpful] && r[COL.helpful].trim()) {
+        commentCards.push(`
+          <div class="comment-card">
+            <div class="comment-meta">
+              <span class="comment-badge helpful">✓ What worked</span>
+              <span class="comment-date">${ts}</span>
+            </div>
+            <div class="comment-text">${escHtml(r[COL.helpful])}</div>
+          </div>`);
+      }
+      if (r[COL.improve] && r[COL.improve].trim()) {
+        commentCards.push(`
+          <div class="comment-card">
+            <div class="comment-meta">
+              <span class="comment-badge improve">↑ Could improve</span>
+              <span class="comment-date">${ts}</span>
+            </div>
+            <div class="comment-text">${escHtml(r[COL.improve])}</div>
+          </div>`);
+      }
+      if (r[COL.missingYN] === 'yes' && r[COL.missingText] && r[COL.missingText].trim()) {
+        commentCards.push(`
+          <div class="comment-card">
+            <div class="comment-meta">
+              <span class="comment-badge missing">? Missing</span>
+              <span class="comment-date">${ts}</span>
+            </div>
+            <div class="comment-text">${escHtml(r[COL.missingText])}</div>
+          </div>`);
+      }
+    });
+
+    const feedEl = document.getElementById('comments-feed');
+    document.getElementById('comments-title').textContent =
+      `Recent Comments (${commentCards.length})`;
+    feedEl.innerHTML = commentCards.length
+      ? commentCards.slice(0, 15).join('')
+      : `<div class="no-comments">No comments yet for ${trainer}</div>`;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showDebug() {
+    const panel = document.getElementById('debug-panel');
+    const el = document.getElementById('debug-content');
+    if (!rawDebugRows.length) {
+      el.textContent = 'No data loaded yet — click Refresh first.';
+      panel.style.display = 'block';
+      return;
+    }
+    const header = rawDebugRows[0] || [];
+    let out = `Total rows fetched (inc header): ${rawDebugRows.length}\n`;
+    out += `Header: ${JSON.stringify(header)}\n\n`;
+    out += `Data rows (${rawDebugRows.length - 1}):\n`;
+    rawDebugRows.slice(1).forEach((row, i) => {
+      const trainer = row[1] !== undefined ? `"${row[1]}"` : 'MISSING';
+      const csat    = row[4] !== undefined ? `"${row[4]}"` : 'MISSING';
+      const cols    = row.length;
+      out += `  [${i+1}] trainer=${trainer}  csat=${csat}  cols=${cols}\n`;
+    });
+    out += `\nTrainer counts:\n`;
+    const counts = {};
+    rawDebugRows.slice(1).forEach(r => {
+      const t = (r[1] || '(blank)').trim();
+      counts[t] = (counts[t] || 0) + 1;
+    });
+    Object.entries(counts).forEach(([t, c]) => { out += `  "${t}": ${c} rows\n`; });
+    el.textContent = out;
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth' });
+  }
+
+    function toggleMenu() {
+    const btn     = document.getElementById('hamburger-btn');
+    const drawer  = document.getElementById('nav-drawer');
+    const overlay = document.getElementById('nav-overlay');
+    const isOpen  = drawer.classList.contains('open');
+    if (isOpen) {
+      closeMenu();
+    } else {
+      btn.classList.add('open');
+      drawer.classList.add('open');
+      overlay.classList.add('open');
+    }
+  }
+
+  function closeMenu() {
+    document.getElementById('hamburger-btn').classList.remove('open');
+    document.getElementById('nav-drawer').classList.remove('open');
+    document.getElementById('nav-overlay').classList.remove('open');
+  }
+
+    // Boot
+  loadData();
+</script>
+</body>
+</html>
